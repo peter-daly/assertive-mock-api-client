@@ -1,0 +1,7 @@
+version: '3.8'
+
+services:
+  assertive-mock-api-server:
+    image: ghcr.io/peter-daly/assertive-mock-api-server:latest
+    ports:
+      - 8910:8910
