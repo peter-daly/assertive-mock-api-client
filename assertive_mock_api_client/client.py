@@ -1,7 +1,7 @@
 import json
 from typing import Any
 
-from assertive import Criteria, is_gte
+from assertive import Criteria, as_json_matches, is_gte
 from pydantic import BaseModel, Field
 from assertive.serialize import serialize
 import httpx
@@ -100,7 +100,14 @@ class MockApiClient:
         path: str | Criteria | None = None,
         method: str | Criteria | None = None,
         body: Any | None = None,
+        json: Any | None = None,
     ) -> "_PreActionedStub":
+        if json is not None and body is not None:
+            raise ValueError("Cannot specify both body and json")
+
+        if json is not None:
+            body = as_json_matches(json)
+
         return _PreActionedStub(
             self,
             StubRequestPayload(
