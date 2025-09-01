@@ -90,7 +90,6 @@ class _PreActionedStub:
 class MockApiClient:
     def __init__(self, base_url: str = "http://localhost:8910"):
         self.base_url = base_url
-        self.inner_client = httpx.Client(base_url=base_url)
 
     def when_requested_with(
         self,
@@ -129,8 +128,9 @@ class MockApiClient:
         serialized_stub = stub.model_dump(exclude_unset=True, exclude_none=True)
 
         # Send the stub to the mock API server
-        response = self.inner_client.post(
-            "/__mock__/stubs",
+
+        response = httpx.post(
+            f"{self.base_url}/__mock__/stubs",
             json=serialized_stub,
         )
 
@@ -160,8 +160,8 @@ class MockApiClient:
             times=serialize(times),
         )
 
-        response = self.inner_client.post(
-            "/__mock__/assert",
+        response = httpx.post(
+            f"{self.base_url}/__mock__/assert",
             json=assertion.model_dump(exclude_none=True, exclude_unset=True),
         )
 
@@ -170,10 +170,3 @@ class MockApiClient:
         result = json_response["result"]
 
         return result
-
-    @property
-    def http_client(self) -> httpx.Client:
-        """
-        Returns the HTTP client.
-        """
-        return self.inner_client
