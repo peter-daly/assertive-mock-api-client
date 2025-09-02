@@ -54,7 +54,14 @@ class _PreActionedStub:
         self.mock_api = mock_api
         self.request = request
 
-    def respond_with(self, status_code: int, headers: dict, body: Any) -> None:
+    def respond_with(
+        self,
+        *,
+        status_code: int,
+        headers: dict,
+        body: Any,
+        max_calls: int | None = None,
+    ) -> None:
         """
         Responds with the given response.
         """
@@ -65,25 +72,38 @@ class _PreActionedStub:
         )
 
         action = StubActionPayload(response=response)
-        stub = StubPayload(request=self.request, action=action)
+        stub = StubPayload(request=self.request, action=action, max_calls=max_calls)
         self.mock_api.create_stub(stub)
 
     def respond_with_json(
-        self, status_code: int, body: dict, headers: dict = {}
+        self,
+        *,
+        status_code: int,
+        body: dict,
+        headers: dict = {},
+        max_calls: int | None = None,
     ) -> None:
         return self.respond_with(
             status_code=status_code,
             headers={"Content-Type": "application/json", **headers},
             body=json.dumps(body),
+            max_calls=max_calls,
         )
 
-    def proxy_to(self, url: str, headers: dict = {}, timeout: int = 5) -> None:
+    def proxy_to(
+        self,
+        *,
+        url: str,
+        headers: dict = {},
+        timeout: int = 5,
+        max_calls: int | None = None,
+    ) -> None:
         """
         Proxies the request to the given URL.
         """
         proxy = StubProxyPayload(url=url, headers=headers, timeout=timeout)
         action = StubActionPayload(proxy=proxy)
-        stub = StubPayload(request=self.request, action=action)
+        stub = StubPayload(request=self.request, action=action, max_calls=max_calls)
         self.mock_api.create_stub(stub)
 
 
@@ -93,6 +113,7 @@ class MockApiClient:
 
     def when_requested_with(
         self,
+        *,
         host: str | Criteria | None = None,
         headers: dict | Criteria | None = None,
         query: dict | Criteria | None = None,
@@ -138,6 +159,7 @@ class MockApiClient:
 
     def confirm_request(
         self,
+        *,
         host: str | Criteria | None = None,
         path: str | Criteria | None = None,
         method: str | Criteria | None = None,
